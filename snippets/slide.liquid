@@ -86,7 +86,7 @@ Usage:
     <div class="slideshow__slide-desktop{% if overlay %} overlay{% endif %}">
       <div class="desktop">
         {%
-          render 'basic-responsive-image',
+          render 'basic-responsive-image-slide',
           type: block.settings.image
           width: 1800,
           loading: loading
@@ -95,7 +95,7 @@ Usage:
       <div class="mobile">
         {% unless block.settings.mobile_image == blank %}
           {%
-            render 'basic-responsive-image',
+            render 'basic-responsive-image-slide-m',
             type: block.settings.mobile_image,
             width: 675,
             loading: loading,
@@ -103,7 +103,7 @@ Usage:
           %}
         {% else %}
           {%
-            render 'basic-responsive-image',
+            render 'basic-responsive-image-slide',
             type: block.settings.image,
             width: 675,
             loading: loading,

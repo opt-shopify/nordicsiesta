@@ -1,0 +1,48 @@
+{% if template contains "product" %}
+    <!-- BEGIN app block: shopify://apps/klaviyo-email-marketing-sms/blocks/klaviyo-onsite-embed/2632fe16-c075-4321-a88b-50b567f42507 -->
+      <script type="lazyload_js" data-src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=SFU25A"></script>
+      <script type="lazyload_js">!function(){if(!window.klaviyo){window._klOnsite=window._klOnsite||[];try{window.klaviyo=new Proxy({},{get:function(n,i){return"push"===i?function(){var n;(n=window._klOnsite).push.apply(n,arguments)}:function(){for(var n=arguments.length,o=new Array(n),w=0;w<n;w++)o[w]=arguments[w];var t="function"==typeof o[o.length-1]?o.pop():void 0,e=new Promise((function(n){window._klOnsite.push([i].concat(o,[function(i){t&&t(i),n(i)}]))}));return e}}})}catch(n){window.klaviyo=window.klaviyo||[],window.klaviyo.push=function(){var n;(n=window._klOnsite).push.apply(n,arguments)}}}}();</script>
+    
+        <script id="viewed_product">
+          if (item == null) {
+            var _learnq = _learnq || [];
+            var item = {
+              Name: "Palermo Pants",
+              ProductID: 8715415257415,
+              Categories: ["Bukser"],
+              ImageURL: "https://nordicsiesta.dk/cdn/shop/files/Designudennavn_14_grande.jpg?v=1705918116",
+              URL: "https://nordicsiesta.dk/products/palermo-pants-habitbukser",
+              Brand: "Nordic Siesta",
+              Price: "799,00 kr",
+              CompareAtPrice: "0,00 kr"
+            };
+            _learnq.push(['track', 'Viewed Product', item]);
+            _learnq.push(['trackViewedItem', {
+              Title: item.Name,
+              ItemId: item.ProductID,
+              Categories: item.Categories,
+              ImageUrl: item.ImageURL,
+              Url: item.URL,
+              Metadata: {
+                Brand: item.Brand,
+                Price: item.Price,
+                CompareAtPrice: item.CompareAtPrice
+              }
+            }]);
+          }
+        </script>
+      
+      <script>
+        window.klaviyoReviewsProductDesignMode = false
+      </script>
+    <!-- END app app block -->
+{% else %}
+      <!-- BEGIN app block: shopify://apps/klaviyo-email-marketing-sms/blocks/klaviyo-onsite-embed/2632fe16-c075-4321-a88b-50b567f42507 -->
+        <script type="lazyload_js" data-src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=SFU25A"></script>
+        <script type="lazyload_js">!function(){if(!window.klaviyo){window._klOnsite=window._klOnsite||[];try{window.klaviyo=new Proxy({},{get:function(n,i){return"push"===i?function(){var n;(n=window._klOnsite).push.apply(n,arguments)}:function(){for(var n=arguments.length,o=new Array(n),w=0;w<n;w++)o[w]=arguments[w];var t="function"==typeof o[o.length-1]?o.pop():void 0,e=new Promise((function(n){window._klOnsite.push([i].concat(o,[function(i){t&&t(i),n(i)}]))}));return e}}})}catch(n){window.klaviyo=window.klaviyo||[],window.klaviyo.push=function(){var n;(n=window._klOnsite).push.apply(n,arguments)}}}}();</script>
+      
+        <script>
+          window.klaviyoReviewsProductDesignMode = false
+        </script>
+      <!-- END app app block -->
+{% endif %}

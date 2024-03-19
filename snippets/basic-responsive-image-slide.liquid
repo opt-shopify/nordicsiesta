@@ -37,14 +37,14 @@ Usage:
 {% capture loading %}{{ loading | default: 'lazy' }}{% endcapture %}
 {% capture fetch_priority %}{{ fetchpriority | default: 'auto' }}{% endcapture %}
 <div class="box-ratio {{ class }}" style="padding-bottom: {{ image_box_ratio }};">
-
-  <img class="{{ img_class }}"
+  
+        <img class="{{ img_class }}"
             data-class="LazyLoad"
             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="  
 			data-src="{{- type | image_url: width: 1524 -}}"
-            data-mob-src="{{- type | image_url: width: 580 -}}"
             height=""
             width=""
+            alt="nordicsiesta"
 		/>
   
 </div>

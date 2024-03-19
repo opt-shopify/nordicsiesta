@@ -30,12 +30,17 @@
                     assign fetch_priority = 'high'
                   endif
                  %}
-                {{ media | image_url: width: 200 | image_tag:
-                  class: "js-thumb-item-img",
-                  data-image-id: media.id,
-                  loading: loading,
-                  fetchpriority: fetch_priority
-                }}
+                    
+                 <img class="{{ js-thumb-item-img }}"
+                    data-class="LazyLoad"
+                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="  
+        			data-src="{{- media | image_url: width: 200 -}}"
+                    data-image-id="{{ media.id }}"
+                    fetchpriority="{{ fetch_priority }}"
+                    height=""
+                    width=""
+        		/>
+                    
                 <noscript>
                   {{ media | image_url: width: 100 | image_tag: alt: media.alt | escape }}
                 </noscript>
@@ -111,6 +116,7 @@
                     assign fetch_priority = 'high'
                   endif
                  %}
+              
                 {{ media | image_url: width: 2400 | image_tag:
                   class: 'product__image',
                   data-zoom-src: zoom_src,
@@ -121,6 +127,7 @@
                   loading: loading,
                   fetchpriority: fetch_priority
                 }}
+              
                 {% if click_to_enlarge and template != 'product.quick' %}
                   <a class="zoom_btn"
                      href="{{ media | image_url: width: 2400 }}"
