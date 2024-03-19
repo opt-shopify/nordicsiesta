@@ -1,0 +1,639 @@
+{%- liquid
+
+  assign locale_selector = false
+  assign country_selector = false
+
+  if section.settings.show_country_selector and localization.available_countries.size > 1
+    assign country_selector = true
+  endif
+
+  if section.settings.show_locale_selector and localization.available_languages.size > 1
+    assign locale_selector = true
+  endif
+
+  case section.blocks.size
+    when 0
+    when 1
+      assign column_width = 'desktop-12 tablet-6 mobile-3'
+    when 2
+      assign column_width = 'desktop-6 tablet-3 mobile-3'
+    when 3
+      assign column_width = 'desktop-4 tablet-3 mobile-3'
+    when 4
+      assign column_width = 'desktop-3 tablet-3 mobile-3'
+  endcase
+
+-%}
+
+{% if locale_selector or country_selector %}
+  {{ 'component-footer-disclosures.css' | asset_url | stylesheet_tag }}
+{% endif %}
+
+<div class="footer-section" data-section-id="{{ section.id }}" data-section-type="footer-section">
+<footer>
+  <div id="footer-wrapper">
+    <div id="footer" class="row" >
+      {% for block in section.blocks %}
+        <section class="footer-block block-{{ block.id }}" {{ block.shopify_attributes }}>
+          {% case block.type %}
+          {% when 'menu' %}
+            <div class="footer-sect">
+              <h2 class="h4">{{ block.settings.title | escape }}</h2>
+              <ul>
+                {% for link in linklists[block.settings.footer_nav].links %}
+                  <li>{{ link.title | link_to: link.url }}</li>
+                {% endfor %}
+              </ul>
+              <style>
+                  @media (min-width: 980px) {
+                    .footer-block.block-{{ block.id }} {
+                      flex-grow: 1;
+                      flex-basis: 180px;
+                    }
+                  }
+                  @media (max-width: 740px) {
+                    .footer-block.block-{{ block.id }} {
+                      display: inline-block;
+                      width: 49%;
+                      margin-top: 40px;
+                    }
+                  }
+              </style>
+            </div>
+          {% when 'newsletter' %}
+            <div class="footer-sect">
+              <h2 class="h4">{{ block.settings.title | escape }}</h2>
+              {{ block.settings.mailing_subheading }}
+              <div id="footer_signup">
+                  {% form 'customer' %}
+                  {{ form.errors | default_errors }}
+                  {% if form.posted_successfully? %}
+                  <p class="success">{{ 'general.password_page.thanks' | t }}</p>
+                  {% else %}
+                  <input type="hidden" name="contact[tags]" value="prospect, newsletter">
+                  <label class="visually-hidden" for="footer-EMAIL">{{ 'general.newsletter_form.newsletter_email' | t }}</label>
+                  <input type="email" name="contact[email]" id="footer-EMAIL" placeholder="{{ 'general.newsletter_form.newsletter_email' | t }}">
+                  <input type="submit" id="footer-subscribe" value="{{ 'general.newsletter_form.submit' | t }}">
+                  {% endif %}
+                  {% endform %}
+                  <style>
+                    @media (min-width: 980px) {
+                      .footer-block.block-{{ block.id }} {
+                        flex-grow: 2;
+                        flex-basis: 400px
+                      }
+                    }
+                    @media (max-width: 740px) {
+                      .footer-block.block-{{ block.id }} {
+                        margin-top: 40px;
+                      }
+                    }
+                  </style>
+              </div>
+            </div>
+          {% when 'text' %}
+            <div class="footer-sect">
+              {%- if block.settings.title != blank -%}<h2 class="h4">{{ block.settings.title | escape }}</h2>{%- endif -%}
+              {%- if block.settings.bottom_logo != blank -%}
+                {{ block.settings.bottom_logo | image_url: width: 400 | image_tag: class: 'logo-image' }}
+              {%- endif -%}
+              {%- if block.settings.footer_text != blank -%}
+                <div class="rte">
+                  {{ block.settings.footer_text }}
+                </div>
+              {%- endif -%}
+              <style>
+                @media (min-width: 980px) {
+                  .footer-block.block-{{ block.id }} {
+                    flex-grow: 2;
+                    flex-basis: 400px
+                  }
+                }
+                .footer-block.block-{{ block.id }} .logo-image {
+                  max-width: {{ block.settings.bottom_logo_max_width }}px;
+                  width: {{ block.settings.bottom_logo_max_width }}px;
+                }
+              </style>
+            </div>
+          {% endcase %}
+        </section>
+      {% endfor %}
+    </div>
+    <div id="bottom-footer" class="row">
+      <div class="footer-left">
+        {% if section.settings.show_social_icons %}
+          <div class="clear"></div>
+          {% render 'social-icons',
+            wrapper: '.footer-left',
+            fill_color: 'var(--footer-icons-color)',
+            social_grid:  'desktop-12 tablet-6 mobile-3' %}
+        {% endif %}
+
+        {%- if shop.features.follow_on_shop? and section.settings.enable_follow_on_shop -%}
+          <div class="footer__follow-on-shop mt10">
+            {{ shop | login_button: action: 'follow' }}
+          </div>
+        {%- endif -%}
+
+        <div id="copy" class="desktop-12 tablet-6 mobile-3">
+          <p>
+            {% if section.settings.show_copyright %}{{ 'general.footer.copyright' | t }} &copy; {{ 'now' | date: "%Y" }} {{ shop.name | link_to: '/' }}. &nbsp;{% endif %}{{ powered_by_link }}
+          </p>
+        </div>
+
+      </div>
+      <div class="footer-right">
+        {% if locale_selector or country_selector %}
+
+        <div class="disclosures desktop-12 tablet-6 mobile-3">
+          <div class="selectors-form">
+            {%- if locale_selector -%}
+              <div class="selectors-form__item">
+                <noscript>
+                  {%-
+                    form 'localization',
+                    id: 'FooterLanguageFormNoScript',
+                    class: 'localization-form selectors-form',
+                    data-disclosure-form: ''
+                  -%}
+                    <h2 class="visually-hidden" id="FooterLanguageLabelNoScript">
+                      {{ 'general.currency.dropdown_label' | t }}
+                    </h2>
+                    <div class="selectors-form__select">
+                      <select
+                        name="locale_code"
+                        class="localization-selector button"
+                        aria-labelledby="FooterLanguageLabelNoScript">
+                        <option value="" disabled>{{ 'general.language.dropdown_label' | t }}</option>
+                        {%- for language in localization.available_languages -%}
+                          <option
+                            value="{{ language.iso_code }}"
+                            lang="{{ language.iso_code }}"
+                            {%- if language.iso_code == localization.language.iso_code %}
+                            selected
+                            {% endif %}>
+                            {{ language.endonym_name | capitalize }}
+                          </option>
+                        {%- endfor -%}
+                      </select>
+                      {% render 'snip-icons',
+                         type: 'apollo',
+                         icon: 'down-carrot',
+                         size: '5px',
+                         fill: 'var(--footer-text)',
+                         hover: 'var(--footer-text)' %}
+                    </div><!-- /.selectors-form__select -->
+                    <button class="localization-form__noscript-btn">
+                      {% render 'snip-icons',
+                         type: 'apollo',
+                         icon: 'checkmark',
+                         size: '12px',
+                         fill: 'var(--footer-text)',
+                         hover: 'var(--footer-text)' %}
+                    </button>
+                  {%- endform -%}
+                </noscript>
+                {%-
+                  form 'localization',
+                  id: 'FooterLanguageForm',
+                  class: 'localization-form selectors-form',
+                  data-disclosure-form: ''
+                -%}
+                <div class="disclosure" data-disclosure-locale>
+                  <div class="no-js-hidden">
+                    <h2 class="visually-hidden" id="FooterLanguageLabel">
+                      {{ 'general.language.dropdown_label' | t }}
+                    </h2>
+                    <button
+                      type="button"
+                      class="disclosure__toggle"
+                      aria-expanded="false"
+                      aria-controls="FooterLanguageList"
+                      aria-describedby="FooterLanguageLabel"
+                      data-disclosure-toggle>
+                      {{ localization.language.endonym_name | capitalize }}
+                      {% render 'snip-icons',
+                         type: 'apollo',
+                         icon: 'down-carrot',
+                         size: '5px',
+                         fill: 'var(--footer-text)',
+                         hover: 'var(--footer-text)' %}
+                    </button>
+                    <ul id="FooterLanguageList" class="disclosure-list" data-disclosure-list>
+                      {%- for language in localization.available_languages -%}
+                        <li
+                          class="disclosure-list__item {% if language.iso_code == localization.language.iso_code %}disclosure-list__item--current{% endif %}">
+                          <a
+                            class="disclosure-list__option"
+                            href="#"
+                            hreflang="{{ language.iso_code }}"
+                            title="{{ language.endonym_name | capitalize }}"
+                            lang="{{ language.iso_code }}"
+                            {% if language.iso_code == localization.language.iso_code %}
+                            aria-current="true"
+                            {% endif %}
+                            data-value="{{ language.iso_code | capitalize }}"
+                            data-disclosure-option>
+                            {{ language.endonym_name | capitalize }}
+                          </a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                    <input type="hidden" name="locale_code" value="{{ localization.language.iso_code }}" data-disclosure-input/>
+                  </div><!-- /.no-js-hidden -->
+                </div><!-- /.disclosure -->
+              {%- endform -%}
+              </div><!-- /.selectors-form__item -->
+            {%- endif -%}
+
+            {%- if country_selector -%}
+              <div class="selectors-form__item">
+
+                <noscript>
+                  {%-
+                    form 'localization',
+                    id: 'FooterCountryFormNoScript',
+                    class: 'localization-form selectors-form',
+                    data-disclosure-form: ''
+                  -%}
+                    <h2 class="visually-hidden" id="FooterCountryLabelNoScript">
+                      {{ 'general.currency.dropdown_label' | t }}
+                    </h2>
+                    <div class="selectors-form__select">
+                      <select
+                        class="localization-selector button"
+                        name="country_code"
+                        aria-labelledby="FooterCountryLabelNoScript">
+                        <option value="" disabled>{{ 'general.currency.dropdown_label' | t }}</option>
+                        {%- for country in localization.available_countries -%}
+                          <option
+                            value="{{ country.iso_code }}"
+                            {%- if country.iso_code == localization.country.iso_code %}
+                            selected
+                            {% endif %}>
+                            {{ country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})
+                          </option>
+                        {%- endfor -%}
+                      </select>
+                      {% render 'snip-icons',
+                         type: 'apollo',
+                         icon: 'down-carrot',
+                         size: '5px',
+                         fill: 'var(--footer-text)',
+                         hover: 'var(--footer-text)' %}
+                    </div><!-- /.selectors-form__select -->
+                    <button class="localization-form__noscript-btn">
+                      {% render 'snip-icons',
+                         type: 'apollo',
+                         icon: 'checkmark',
+                         size: '12px',
+                         fill: 'var(--footer-text)',
+                         hover: 'var(--footer-text)' %}
+                    </button>
+                  {% endform %}
+                </noscript>
+                {%-
+                  form 'localization',
+                  id: 'FooterCountryForm',
+                  class: 'localization-form selectors-form',
+                  data-disclosure-form: ''
+                -%}
+                <div class="disclosure" data-disclosure-country>
+                  <div class="no-js-hidden">
+                      <h2 class="visually-hidden" id="FooterCountryLabel">
+                        {{ 'general.currency.dropdown_label' | t }}
+                      </h2>
+                      <button
+                        type="button"
+                        class="disclosure__toggle"
+                        aria-expanded="false"
+                        aria-controls="FooterCountryList"
+                        aria-describedby="FooterCountryLabel"
+                        data-disclosure-toggle>
+                        {% if section.settings.show_flag %}
+                          <span class="country--flag">
+                            {{ localization.country | image_url: width: 32 | image_tag: class: 'disclosure__toggle__flag', loading: 'lazy', image_alt: country.name }}
+                          </span>
+                        {% endif %}
+                        {{ localization.country.name }} ({{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }})
+                        {% render 'snip-icons',
+                           type: 'apollo',
+                           icon: 'down-carrot',
+                           size: '5px',
+                           fill: 'var(--footer-text)',
+                           hover: 'var(--footer-background)' %}
+                      </button>
+                      <ul
+                        id="FooterCountryList"
+                        class="disclosure-list"
+                        data-disclosure-list>
+                        {% for country in localization.available_countries %}
+                          <li class="disclosure-list__item {% if country.iso_code == localization.country.iso_code %}disclosure-list__item--current{% endif %}">
+                            <a
+                              class="disclosure-list__option"
+                              href="#"
+                              title="{{ country.iso_code }}"
+                              {% if country.iso_code == localization.country.iso_code %}
+                              aria-current="true"
+                              {% endif %}
+                              data-value="{{ country.iso_code }}"
+                              data-disclosure-option>
+                              <span class="country--name">{{ country.name }}</span> <span class="localization-form__currency">{{ country.currency.iso_code }} {{ country.currency.symbol }}</span>
+                            </a>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                      <input type="hidden" name="country_code" value="{{ localization.country.iso_code }}" data-disclosure-input/>
+                  </div><!-- /.no-js-hidden -->
+                </div><!-- /.disclosure -->
+                {% endform %}
+              </div><!-- /.selectors-form__item -->
+            {%- endif -%}
+          </div><!-- /.selectors_form -->
+        </div><!-- /.disclosures -->
+
+        {% endif %}
+        {% if section.settings.show_credit_cards %}
+          <div id="payment" class="credit desktop-12 tablet-6 mobile-3">
+            {% assign enabled_payment_types = 'mobilepay,visa,visaelectron,master,dankort,apple_pay' | remove: ' ' | split: ',' %}
+{% for type in enabled_payment_types %}
+              {{ type | payment_type_svg_tag: class:'payment-icon' }}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</footer>
+<script>
+  function iatModifyAutoAddFlag(iatAutoAddFlag){
+      var newiatAutoAddFlag = 1;
+      return newiatAutoAddFlag;
+    }
+</script>
+<style>
+  #footer .footer-sect {
+    text-align: {{ section.settings.text_alignment }};
+    {% if section.settings.text_alignment == 'center' %}
+    margin-left: auto;
+    margin-right: auto;
+    {% endif %}
+  }
+  #footer-wrapper {
+    text-align: {{ section.settings.footer_text_align }};
+  }
+
+  @media (min-width: 980px) {
+    #footer {
+  	   display: flex;
+    }
+    .footer-block + .footer-block {
+      margin-left: 3%;
+    }
+  }
+
+  div#bottom-footer {
+    display: flex;
+    margin: 0 auto;
+    padding-top: 32px;
+    border-top: 1px solid {{ settings.footer_border }};
+    margin-top: 64px;
+    align-items: flex-end;
+  }
+
+  div#bottom-footer .footer-left {
+    width: 50%;
+    text-align: left;
+  }
+
+  div#bottom-footer .footer-right {
+    width: 50%;
+    text-align: right;
+  }
+
+  div#bottom-footer #copy p {
+    text-align: left;
+    margin: 0;
+  }
+  div#bottom-footer #payment {
+    text-align: right;
+    margin-top: 16px;
+  }
+  div#bottom-footer #footer-icons {
+    margin: 0;
+  }
+  div#bottom-footer #footer-icons i {
+    font-size: 19px;
+  }
+  div#bottom-footer div#copy {
+    margin-top: 21px;
+    text-transform: capitalize;
+  }
+
+  @media (min-width: 980px) {
+    #footer #payment {
+      text-align: {{ section.settings.footer_text_align }};
+    }
+    #footer ul#footer-icons {
+      text-align: {{ section.settings.footer_text_align }};
+    }
+    {% if section.settings.footer_text_align == 'left' %}
+      #footer ul#footer-icons li:first-child {
+        margin-left: 0;
+        padding-left: 0;
+      }
+      #footer .selectors-form {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+      }
+    {% endif %}
+  }
+  @media (max-width: 740px) {
+    div#bottom-footer {
+      flex-wrap: wrap;
+    }
+    div#bottom-footer .footer-left {
+      width: 100%;
+      text-align: left;
+      order:2;
+      margin-top: 31px;
+    }
+    div#bottom-footer .footer-right {
+      width: 100%;
+      text-align: left;
+      order: 1;
+    }
+    div#bottom-footer .selectors-form {
+      justify-content: flex-start;
+      margin: 0;
+    }
+    div#bottom-footer #payment {
+      text-align: left;
+    }
+    div#bottom-footer  .footer-section .disclosure__toggle {
+      height: 44px;
+      width: 80px;
+    }
+    section.footer-block {
+      vertical-align: top;
+    }
+  }
+</style>
+</div>
+{% schema %}
+{
+  "name": "Footer",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "select",
+      "id": "footer_text_align",
+      "label": "Footer text align",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_credit_cards",
+      "label": "Show payment icons",
+      "default": true,
+      "info": "The icons that show are determined by your store's payment settings."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social_icons",
+      "label": "Show social icons",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Follow on Shop",
+      "info": "Display follow button for your storefront on the Shop app. [Learn more](https://help.shopify.com/en/manual/online-store/themes/customizing-themes/follow-on-shop)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_follow_on_shop",
+      "default": true,
+      "label": "Enable Follow on Shop"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_copyright",
+      "label": "Show site name and copyright",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Language Selector",
+      "info": "To add a language, go to your [language settings.](/admin/settings/languages)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_locale_selector",
+      "label": "Show language selector",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Country/Region Selector",
+      "info": "To add a country/region, go to your [payment settings.](/admin/settings/payments)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_country_selector",
+      "label": "Show country/region selector",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_flag",
+      "label": "Show selected country flag",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "footer_nav",
+          "label": "Choose a menu",
+          "info": "This menu won't show dropdown items"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Menu title",
+          "default": "Explore"
+        }
+      ]
+    },
+    {
+      "type": "newsletter",
+      "name": "Newsletter signup",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Mailing list section title",
+          "default": "Connect"
+        },
+        {
+          "type": "richtext",
+          "id": "mailing_subheading",
+          "label": "Mailing list subheading",
+          "default": "<p>Join our mailing list for updates</p>"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Text title",
+          "default": "About"
+        },
+        {
+          "id": "footer_text",
+          "type": "richtext",
+          "label": "Text",
+          "default": "<p>Adding text to your footer helps introduce your business to new customers.</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "bottom_logo",
+          "label": "Show logo image"
+        },
+        {
+          "type": "range",
+          "id": "bottom_logo_max_width",
+          "min": 100,
+          "max": 600,
+          "step": 10,
+          "unit": "px",
+          "label": "Logo image width",
+          "default": 300
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
